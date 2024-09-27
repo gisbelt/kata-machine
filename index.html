@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
+	<script defer src="https://unpkg.com/htmx.org/dist/ext/client-side-templates.js"></script>
+	<script defer src="https://unpkg.com/mustache@latest"></script>
+	<title>HTMX</title>
+
+	<style>
+		body {
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+			font-size: 18px;
+		}
+		li {
+			margin-bottom: 4px;
+			max-width: 300px;
+		}
+		.box {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		.loader {
+			 width: 10px;
+			 height: 10px;
+			 border: 1px solid #000;
+			 border-bottom-color: transparent;
+			 border-radius: 50%;
+			 display: inline-block;
+			 box-sizing: border-box;
+			 text-align: center;
+			 animation: rotation 1s linear infinite;
+		}
+		.button {
+			transition: opacity .3s;
+		}
+		.button:disabled {
+			opacity: .3;
+			pointer-events: none;
+			cursor: not-allowed;
+		}
+		#results.htmx-swapping {
+			opacity: 0;
+			transition: opacity 1s ease;
+		}
+		#results.settling {
+			animation: ease fadeIn 1s both;
+		}
+		@keyframes fadeIn {
+			0% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+		@keyframes rotation {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<body class="">
+	<div class="box w-full min-h-screen bg-neutral-900 px-6 py-10" hx-ext="client-side-templates">
+		<div class="mb-6">
+			<label for="large-input" class="block mb-2 text-base font-medium text-white dark:text-white">Buscar Película</label>
+			<!-- hx-swap="innerHTML swap:1s settle:1s"  -->
+			<input
+				hx-post="https://api.themoviedb.org/3/movie/popular?api_key=7be72508776961f3948639fbd796bccd"
+				hx-trigger="input changed delay:500ms"
+				hx-target="#results"
+				hx-swap="innerHTML transition:true"
+				mustache-template="template-results"
+				placeholder="Avengers, The Matrix..." 
+				name="search"
+				type="search" 
+				id="large-input" 
+				class="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+		</div>
+
+		<!-- hx-get="https://hn.algolia.com/api/v1/search?tags=front_page&page=0&hitsPerPage=10"  -->
+		<button
+			hx-get="https://api.themoviedb.org/3/movie/popular?api_key=7be72508776961f3948639fbd796bccd&page=1"
+			hx-trigger="click"
+			hx-target="#results"
+			hx-swap="innerHTML"
+			hx-indicator=".loader"
+			hx-disabled-elt="this"
+			mustache-template="template-results"
+			class="text-white bg-black p-3 rounded-md"
+		>
+			Cargar Resultados
+		</button>
+		
+		<span class="htmx-indicator loader"></span>
+		
+		<ul id="results" class="grid grid-cols-2 gap-2 max-w-2xl mx-auto">
+		
+		</ul>
+
+		<!-- <template id="template-results">
+			{{ #hits }}
+				<li>
+					<a href="{{ url }}">{{ title }} </a>
+				</li>
+			{{ /hits }}
+			<li
+				hx-get="https://hn.algolia.com/api/v1/search?tags=front_page&page=2&hitsPerPage=10"
+				hx-trigger="revealed"
+				hx-swap="outerHTML"
+				mustache-template="template-results"
+			>
+			</li>
+		</template> -->
+
+		<template id="template-results">
+			{{ #results }}
+				<li>
+					<article> 
+						<!-- <img src="https://image.tmdb.org/t/p/original/{{ poster_path }}" alt="{{ title}}" class="aspect-[11/16] w-full h-auto object-cover rounded-lg"> -->
+						{{ title }} 
+						<span class="text-xs text-gray-500">{{ release_date }}</span>
+					</article>
+				</li>
+			{{ /results }}
+		</template>
+	</div>
+</body>
+</html>
