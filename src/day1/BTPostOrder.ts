@@ -1,4 +1,4 @@
-// Binary Tree InOrder
+// Binary Tree PostOrder
 // In general, what we tend to do is always create a second function whenever we're ' doing recursion
 // let's do a function walk() that takes in just a node
 // also gonna have our path, which is a number array
